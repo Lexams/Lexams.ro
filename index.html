@@ -370,10 +370,8 @@
     --type-hero-display-lh:   1.1;
   }
 
-  /* ── Nav: ascunde linkurile desktop, arată hamburgerul ── */
+  /* ── Nav: ascunde "Exersează" text, păstrează doar Profil ── */
   .lexams-nav-exerseaza { display: none !important; }
-  .lexams-nav-desktop   { display: none !important; }
-  .lexams-nav-burger    { display: inline-flex !important; }
 
   /* ── Hero buttons: stacked ── */
   .hero-cta-row {
@@ -447,7 +445,6 @@
   #app { min-height: 100vh; }
   * { box-sizing: border-box; }
   button { font-family: inherit; cursor: pointer; border: 0; transition: transform 200ms var(--ease-apple); }
-  .lexams-nav-burger { display: none; }
   button:active { transform: scale(0.95); }
   a { text-decoration: none; color: inherit; }
   a.text-link { color: var(--color-primary); }
@@ -536,6 +533,7 @@
 <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 
 
 <div id="app"></div>
@@ -1073,18 +1071,11 @@ const TogaMark = ({ size = 22, dark = false, color, showWord = true, style }) =>
   );
 };
 
-const GlobalNav = ({ current, onNavigate }) => {
+const GlobalNav = ({ current, onNavigate, user, onLogin, onLogout }) => {
   const links = [
     { id: "home", label: "Acasă" },
     { id: "pachete", label: "Pachete" },
     { id: "contact", label: "Contact" },
-  ];
-  const [menuOpen, setMenuOpen] = React.useState(false);
-  const go = (id) => { setMenuOpen(false); onNavigate(id); };
-  const mobileLinks = [
-    ...links,
-    { id: "practice", label: "Exersează" },
-    { id: "profil", label: "Profil" },
   ];
   return (
     <nav
@@ -1110,7 +1101,7 @@ const GlobalNav = ({ current, onNavigate }) => {
         }}
       >
         <button
-          onClick={() => go("home")}
+          onClick={() => onNavigate("home")}
           style={{
             background: "transparent",
             color: "#fff",
@@ -1120,11 +1111,11 @@ const GlobalNav = ({ current, onNavigate }) => {
         >
           <TogaMark size={22} dark={true} />
         </button>
-        <ul className="lexams-nav-desktop" style={{ display: "flex", listStyle: "none", margin: 0, padding: 0, gap: 4 }}>
+        <ul style={{ display: "flex", listStyle: "none", margin: 0, padding: 0, gap: 4 }}>
           {links.map(l => (
             <li key={l.id}>
               <button
-                onClick={() => go(l.id)}
+                onClick={() => onNavigate(l.id)}
                 style={{
                   background: "transparent",
                   color: "#fff",
@@ -1144,7 +1135,7 @@ const GlobalNav = ({ current, onNavigate }) => {
         </ul>
         <div style={{ flex: 1 }} />
         <button
-          onClick={() => go("practice")}
+          onClick={() => onNavigate("practice")}
           className="lexams-nav-exerseaza"
           style={{
             background: "transparent",
@@ -1158,82 +1149,47 @@ const GlobalNav = ({ current, onNavigate }) => {
         >
           Exersează
         </button>
-        <button
-          onClick={() => go("profil")}
-          aria-label="Profil"
-          className="lexams-nav-desktop"
-          style={{
-            background: "transparent",
-            color: "#fff",
-            opacity: current === "profil" ? 1 : 0.78,
-            fontFamily: "var(--font-text)",
-            fontSize: 12,
-            padding: "0 8px",
-            height: "100%",
-            alignItems: "center",
-            gap: 5,
-          }}
-        >
-          <Icon name="user" size={15} />
-          Profil
-        </button>
-        <button
-          onClick={() => setMenuOpen(o => !o)}
-          className="lexams-nav-burger"
-          aria-label="Meniu"
-          aria-expanded={menuOpen}
-          style={{
-            background: "transparent",
-            color: "#fff",
-            padding: "0 6px",
-            height: "100%",
-            alignItems: "center",
-          }}
-        >
-          <Icon name="bars" size={22} />
-        </button>
-      </div>
-      {menuOpen && (
-        <div
-          className="lexams-nav-panel"
-          style={{
-            position: "absolute",
-            top: "var(--nav-global-height)",
-            left: 0,
-            right: 0,
-            background: "var(--color-surface-black)",
-            borderTop: "1px solid rgba(255,255,255,0.10)",
-            padding: "8px 16px 16px",
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          {mobileLinks.map(l => (
+        {user ? (
+          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
             <button
-              key={l.id}
-              onClick={() => go(l.id)}
+              onClick={() => onNavigate("profil")}
+              aria-label="Profil"
               style={{
-                background: "transparent",
-                color: "#fff",
-                opacity: current === l.id ? 1 : 0.82,
-                fontFamily: "var(--font-text)",
-                fontSize: 17,
-                fontWeight: current === l.id ? 600 : 400,
-                letterSpacing: "-0.374px",
-                textAlign: "left",
-                padding: "14px 4px",
-                borderBottom: "1px solid rgba(255,255,255,0.08)",
-                display: "flex",
-                alignItems: "center",
-                gap: 10,
+                background: "transparent", color: "#fff",
+                opacity: current === "profil" ? 1 : 0.78,
+                fontFamily: "var(--font-text)", fontSize: 12,
+                padding: "0 8px", height: "100%",
+                display: "inline-flex", alignItems: "center", gap: 5,
               }}
             >
-              {l.id === "profil" && <Icon name="user" size={17} />}
-              {l.label}
+              <Icon name="user" size={15} />
+              {user.email?.split("@")[0]}
             </button>
-          ))}
-        </div>
-      )}
+            <button
+              onClick={onLogout}
+              style={{
+                background: "transparent", color: "rgba(255,255,255,0.55)",
+                fontFamily: "var(--font-text)", fontSize: 11,
+                padding: "0 8px", height: "100%",
+              }}
+            >
+              Ieși
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={onLogin}
+            style={{
+              background: "var(--color-primary-on-dark)", color: "#fff",
+              fontFamily: "var(--font-text)", fontSize: 12, fontWeight: 600,
+              padding: "7px 14px", borderRadius: "var(--radius-pill)",
+              letterSpacing: "-0.1px",
+            }}
+          >
+            Intră în cont
+          </button>
+        )}
+      </div>
     </nav>
   );
 };
@@ -1930,6 +1886,143 @@ const QuestionRunner = ({ questions, onExit, isSimulare = false }) => {
 };
 
 Object.assign(window, { QuestionRunner, SAMPLE_QUESTIONS });
+
+/* ===== src/auth.jsx ===== */
+const sb = window.supabase.createClient(
+  "https://orrkvtrpmasurzoinwlw.supabase.co",
+  "sb_publishable_N04tZKo73Y0nHegAvrO81w_PpWTVYbn"
+);
+
+const useAuth = () => {
+  const [user, setUser] = React.useState(null);
+  const [loading, setLoading] = React.useState(true);
+  React.useEffect(() => {
+    sb.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+    const { data: { subscription } } = sb.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+  return { user, loading };
+};
+
+const LoginModal = ({ onClose, onSuccess }) => {
+  const [mode, setMode] = React.useState("login");
+  const [email, setEmail] = React.useState("");
+  const [password, setPassword] = React.useState("");
+  const [error, setError] = React.useState("");
+  const [busy, setBusy] = React.useState(false);
+  const [done, setDone] = React.useState(false);
+
+  const submit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setBusy(true);
+    try {
+      if (mode === "login") {
+        const { error: err } = await sb.auth.signInWithPassword({ email, password });
+        if (err) throw err;
+        onSuccess && onSuccess();
+        onClose();
+      } else {
+        const { error: err } = await sb.auth.signUp({ email, password });
+        if (err) throw err;
+        setDone(true);
+      }
+    } catch (err) {
+      setError(err.message || "A apărut o eroare. Încearcă din nou.");
+    }
+    setBusy(false);
+  };
+
+  return (
+    <div style={{
+      position: "fixed", inset: 0, zIndex: 200,
+      background: "rgba(0,0,0,0.55)", backdropFilter: "blur(6px)",
+      display: "flex", alignItems: "center", justifyContent: "center", padding: 24,
+    }} onClick={onClose}>
+      <div style={{
+        background: "#fff", borderRadius: 18, padding: "40px 36px",
+        width: "100%", maxWidth: 400,
+        boxShadow: "0 32px 80px rgba(0,0,0,0.22)",
+        position: "relative",
+      }} onClick={e => e.stopPropagation()}>
+        <button onClick={onClose} style={{
+          position: "absolute", top: 14, right: 16,
+          background: "transparent", color: "#7a7a7a", fontSize: 20, lineHeight: 1,
+        }}>✕</button>
+
+        <div style={{ marginBottom: 24 }}>
+          <TogaMark size={24} />
+        </div>
+
+        {done ? (
+          <div style={{ textAlign: "center", paddingTop: 8 }}>
+            <div style={{ fontSize: 40, marginBottom: 12 }}>✉️</div>
+            <p style={{ fontSize: 18, fontWeight: 700, marginBottom: 8, color: "var(--color-ink)" }}>Verifică emailul!</p>
+            <p style={{ color: "#7a7a7a", fontSize: 14, lineHeight: 1.5 }}>
+              Ți-am trimis un link de confirmare la <strong>{email}</strong>.<br/>
+              Deschide emailul și apasă linkul pentru a activa contul.
+            </p>
+            <button onClick={onClose} style={{
+              marginTop: 28, background: "var(--color-primary)", color: "#fff",
+              borderRadius: 10, padding: "13px 24px", width: "100%", fontWeight: 600, fontSize: 15,
+            }}>Închide</button>
+          </div>
+        ) : (
+          <>
+            <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 6, color: "var(--color-ink)" }}>
+              {mode === "login" ? "Intră în cont" : "Creează cont"}
+            </h2>
+            <p style={{ color: "#7a7a7a", fontSize: 14, marginBottom: 26 }}>
+              {mode === "login" ? "Bine ai revenit la LeXams." : "Înregistrare gratuită, fără card."}
+            </p>
+            <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <input
+                type="email" required placeholder="Adresă email"
+                value={email} onChange={e => setEmail(e.target.value)}
+                style={{ border: "1.5px solid #e0e0e0", borderRadius: 10, padding: "12px 14px", fontSize: 15, outline: "none", fontFamily: "var(--font-text)", transition: "border-color 0.15s" }}
+                onFocus={e => e.target.style.borderColor = "var(--color-primary)"}
+                onBlur={e => e.target.style.borderColor = "#e0e0e0"}
+              />
+              <input
+                type="password" required placeholder="Parolă (min. 6 caractere)" minLength={6}
+                value={password} onChange={e => setPassword(e.target.value)}
+                style={{ border: "1.5px solid #e0e0e0", borderRadius: 10, padding: "12px 14px", fontSize: 15, outline: "none", fontFamily: "var(--font-text)", transition: "border-color 0.15s" }}
+                onFocus={e => e.target.style.borderColor = "var(--color-primary)"}
+                onBlur={e => e.target.style.borderColor = "#e0e0e0"}
+              />
+              {error && (
+                <p style={{ color: "#DC2626", fontSize: 13, margin: 0, background: "#FEF2F2", padding: "8px 12px", borderRadius: 8 }}>
+                  {error}
+                </p>
+              )}
+              <button type="submit" disabled={busy} style={{
+                background: "var(--color-primary)", color: "#fff",
+                borderRadius: 10, padding: "13px 24px", fontWeight: 600, fontSize: 15,
+                opacity: busy ? 0.7 : 1, marginTop: 6, cursor: busy ? "wait" : "pointer",
+              }}>
+                {busy ? "Se procesează..." : mode === "login" ? "Intră în cont" : "Creează cont"}
+              </button>
+            </form>
+            <p style={{ textAlign: "center", fontSize: 13, color: "#7a7a7a", marginTop: 22, marginBottom: 0 }}>
+              {mode === "login" ? "Nu ai cont? " : "Ai deja cont? "}
+              <button
+                onClick={() => { setMode(mode === "login" ? "register" : "login"); setError(""); }}
+                style={{ color: "var(--color-primary)", fontWeight: 600, background: "transparent", fontSize: 13 }}
+              >
+                {mode === "login" ? "Înregistrează-te" : "Intră în cont"}
+              </button>
+            </p>
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
 
 
 /* ===== src/tweaks-panel.jsx ===== */
@@ -2734,7 +2827,7 @@ const HomeScreen = ({ onNavigate, tweaks }) => (
             O lună sau trei luni cu discount. Fără abonament, fără reînnoire automată.
           </p>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginBottom: 40 }} className="mobile-stack">
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginBottom: 40 }}>
           {[
             { tier: "Gratuit", price: "0,00", count: "50" },
             { tier: "Start",   price: "49,00", count: "2 200" },
@@ -3743,8 +3836,14 @@ Object.assign(window, { ContactScreen });
 
 /* ===== src/screens-checkout.jsx ===== */
 
-const CheckoutScreen = ({ pkg, onNavigate }) => {
-  const [email, setEmail] = React.useState("");
+const STRIPE_LINKS = {
+  "Start":   "https://buy.stripe.com/test_9B6bJ113R1Z15jAen44Ja00",
+  "Pro":     "https://buy.stripe.com/test_aFaaEX7sf1Z1h2ia6O4Ja01",
+  "Premium": "https://buy.stripe.com/test_4gMcN58wjeLNcM21Ai4Ja02",
+};
+
+const CheckoutScreen = ({ pkg, onNavigate, user }) => {
+  const [email, setEmail] = React.useState(user?.email ?? "");
   const [agreed, setAgreed] = React.useState(false);
 
   if (!pkg) {
@@ -3839,8 +3938,13 @@ const CheckoutScreen = ({ pkg, onNavigate }) => {
               style={{ alignSelf: "flex-start", opacity: (!email || !agreed) ? 0.45 : 1 }}
               onClick={() => {
                 if (!email || !agreed) return;
-                // TODO: integrate Stripe checkout here
-                alert("Stripe checkout — în curând!");
+                const link = STRIPE_LINKS[pkg.tier];
+                if (link) {
+                  const url = link + "?prefilled_email=" + encodeURIComponent(email);
+                  window.location.href = url;
+                } else {
+                  alert("Accesul gratuit a fost activat!");
+                }
               }}
             >
               {isFree ? "Activează accesul gratuit" : `Plătește ${pkg.price} lei`}
@@ -4124,9 +4228,17 @@ function App() {
   const [route, setRoute] = React.useState("home");
   const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
   const [cartPackage, setCartPackage] = React.useState(null);
+  const [showLogin, setShowLogin] = React.useState(false);
   const mainRef = React.useRef(null);
 
+  const { user, loading: authLoading } = useAuth();
+
   const navigate = (next) => {
+    // Dacă încearcă să acceseze practice/runner fără cont, arată login
+    if ((next === "practice" || next === "runner") && !user) {
+      setShowLogin(true);
+      return;
+    }
     setRoute(next);
     requestAnimationFrame(() => {
       try { window.scrollTo({ top: 0, behavior: "instant" }); }
@@ -4136,18 +4248,38 @@ function App() {
 
   const goToCheckout = (pkg) => {
     setCartPackage(pkg);
-    navigate("checkout");
+    setRoute("checkout");
+  };
+
+  const handleLogout = async () => {
+    await sb.auth.signOut();
+    setRoute("home");
   };
 
   const [practiceMode, setPracticeMode] = React.useState("set");
+
+  const navProps = {
+    user,
+    onLogin: () => setShowLogin(true),
+    onLogout: handleLogout,
+  };
+
+  const loginModal = showLogin && (
+    <LoginModal
+      onClose={() => setShowLogin(false)}
+      onSuccess={() => { setShowLogin(false); setRoute("practice"); }}
+    />
+  );
 
   // Practice hub + runner
   if (route === "practice") {
     return (
       <React.Fragment>
-        <GlobalNav current="practice" onNavigate={navigate} />
+        <GlobalNav current="practice" onNavigate={navigate} {...navProps} />
         <PracticeScreen onNavigate={navigate} onStartRunner={(mode) => { setPracticeMode(mode); navigate("runner"); }} />
         <Footer onNavigate={navigate} />
+        <TogaTweaks t={t} setTweak={setTweak} />
+        {loginModal}
       </React.Fragment>
     );
   }
@@ -4155,8 +4287,10 @@ function App() {
   if (route === "runner") {
     return (
       <React.Fragment>
-        <GlobalNav current="practice" onNavigate={navigate} />
+        <GlobalNav current="practice" onNavigate={navigate} {...navProps} />
         <QuestionRunner questions={SAMPLE_QUESTIONS} onExit={() => navigate("practice")} isSimulare={practiceMode === "simulare"} />
+        <TogaTweaks t={t} setTweak={setTweak} />
+        {loginModal}
       </React.Fragment>
     );
   }
@@ -4164,7 +4298,7 @@ function App() {
   let Screen;
   switch (route) {
     case "pachete":  Screen = <PachetScreen onNavigate={navigate} onBuy={goToCheckout} tweaks={t} />; break;
-    case "checkout": Screen = <CheckoutScreen pkg={cartPackage} onNavigate={navigate} />; break;
+    case "checkout": Screen = <CheckoutScreen pkg={cartPackage} onNavigate={navigate} user={user} />; break;
     case "profil":   Screen = <ProfilScreen onNavigate={navigate} tweaks={t} />; break;
     case "contact":  Screen = <ContactScreen onNavigate={navigate} tweaks={t} />; break;
     case "home":
@@ -4173,12 +4307,61 @@ function App() {
 
   return (
     <React.Fragment>
-      <GlobalNav current={route} onNavigate={navigate} />
+      <GlobalNav current={route} onNavigate={navigate} {...navProps} />
       <div ref={mainRef} key={route} style={{ animation: "togaFadeIn 320ms var(--ease-apple) both" }}>
         {Screen}
       </div>
       <Footer onNavigate={navigate} />
+      <TogaTweaks t={t} setTweak={setTweak} />
+      {loginModal}
     </React.Fragment>
+  );
+}
+
+function TogaTweaks({ t, setTweak }) {
+  return (
+    <TweaksPanel title="Tweaks · Lexams">
+      <TweakSection label="Hero" />
+      <TweakRadio
+        label="Variantă"
+        value={t.heroVariant}
+        options={[
+          { value: "statue", label: "Examen" },
+          { value: "type",   label: "Text" },
+          { value: "book",   label: "Carte" },
+        ]}
+        onChange={(v) => setTweak("heroVariant", v)}
+      />
+      <TweakToggle
+        label="Hero dark"
+        value={t.heroDark}
+        onChange={(v) => setTweak("heroDark", v)}
+      />
+
+      <TweakSection label="Pachete (pricing layout)" />
+      <TweakRadio
+        label="Layout"
+        value={t.pricingLayout}
+        options={[
+          { value: "cards",   label: "Carduri" },
+          { value: "table",   label: "Tabel" },
+          { value: "stacked", label: "Stivuit" },
+        ]}
+        onChange={(v) => setTweak("pricingLayout", v)}
+      />
+
+      <TweakSection label="Profil — vizualizare" />
+      <TweakRadio
+        label="Tip"
+        value={t.profileViz}
+        options={[
+          { value: "bar",   label: "Bare" },
+          { value: "radar", label: "Radar" },
+          { value: "cards", label: "Carduri" },
+        ]}
+        onChange={(v) => setTweak("profileViz", v)}
+      />
+    </TweaksPanel>
   );
 }
 
