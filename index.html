@@ -434,6 +434,24 @@
     overflow-x: auto !important;
     -webkit-overflow-scrolling: touch;
   }
+
+  /* ── Nav pe mobil ── */
+  .lexams-nav { padding: 0 12px !important; }
+
+  /* ── Secțiuni inner: nu depășesc ecranul ── */
+  section > div, main > section > div {
+    max-width: 100% !important;
+    box-sizing: border-box;
+  }
+
+  /* ── Texte hero foarte mari: mai mici pe mobil ── */
+  h1 { font-size: clamp(26px, 7vw, 48px) !important; }
+
+  /* ── Fix: elemente cu padding mare ── */
+  [style*="padding: 0 32px"] {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
 }
 
 </style>
@@ -441,7 +459,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
 <style>
-  html, body { margin: 0; padding: 0; background: var(--color-canvas); font-family: var(--font-text); color: var(--color-ink); }
+  html, body { margin: 0; padding: 0; background: var(--color-canvas); font-family: var(--font-text); color: var(--color-ink); overflow-x: hidden; }
   #app { min-height: 100vh; }
   * { box-sizing: border-box; }
   button { font-family: inherit; cursor: pointer; border: 0; transition: transform 200ms var(--ease-apple); }
