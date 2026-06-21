@@ -2859,14 +2859,14 @@ const HomeScreen = ({ onNavigate, tweaks }) => (
         <div style={{ textAlign: "center", marginBottom: 64 }}>
           <div style={{ fontSize: 13, fontWeight: 600, letterSpacing: "1px", color: "var(--color-ink-muted-48)", textTransform: "uppercase", marginBottom: 12 }}>Cum funcționează</div>
           <h2 style={{ margin: 0, fontFamily: "var(--font-display)", fontSize: 44, fontWeight: 600, letterSpacing: "-0.6px", lineHeight: 1.08, color: "var(--color-ink)", maxWidth: 720, marginInline: "auto", textWrap: "balance" }}>
-            Trei pași. Niciun manual de utilizare.
+            De la prima grilă, la decizia corectă.
           </h2>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 32 }} className="mobile-stack">
           {[
-            { n: "01", title: "Începi gratuit", body: "50 de întrebări din toate materiile, fără cont, fără card. Sau alegi direct un pachet complet." },
-            { n: "02", title: "Răspunzi la întrebări", body: "Câte una sau în seturi cronometrate. Explicații imediat după fiecare răspuns." },
-            { n: "03", title: "Vezi profilul tău", body: "După ~80 de răspunsuri, Lexams îți arată unde ai aplecare. Nu un sfat. O observație." },
+            { n: "01", title: "Începi gratuit", body: "50 de grile din toate materiile. Fără cont, fără card. Simți cum funcționează." },
+            { n: "02", title: "Îți construiești un profil", body: "Cu fiecare răspuns, Lexams îți arată unde ești puternic și unde ai lacune. Nu un sfat — o oglindă." },
+            { n: "03", title: "Alegi ce ți se potrivește", body: "Un pachet complet dacă vrei să te pregătești serios. O simulare de 90 de minute dacă vrei să știi cum ești acum." },
           ].map(s => (
             <div key={s.n} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               <div style={{
