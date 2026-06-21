@@ -4170,25 +4170,50 @@ const PracticeScreen = ({ onNavigate, onStartRunner, user }) => {
     setLoading(true);
     try {
       const pkg = PACKAGES_CONFIG[activePackage];
+      const isGratuit = activePackage === "gratuit";
       const setCount = runMode === "simulare" ? 100 : pkg.setCount;
-      const fetchCount = Math.min(setCount * 4, 400);
 
-      let query = sb.from("intrebari")
-        .select("id, materie, text, optiunea_a, optiunea_b, optiunea_c, raspuns_corect, explicatie")
-        .limit(fetchCount);
+      let questions = [];
 
-      const materii = selectedBranch !== "all" ? MATERIE_MAP[selectedBranch] : null;
-      if (materii && materii.length === 1) {
-        query = query.eq("materie", materii[0]);
-      } else if (materii && materii.length > 1) {
-        query = query.in("materie", materii);
+      if (isGratuit) {
+        const GRATUIT_MATERII = [
+          "Drept civil",
+          "Drept procesual civil",
+          "Drept penal general",
+          "Drept procesual penal",
+          "OEPA",
+        ];
+        const results = await Promise.all(
+          GRATUIT_MATERII.map(m =>
+            sb.from("intrebari")
+              .select("id, materie, text, optiunea_a, optiunea_b, optiunea_c, raspuns_corect, explicatie")
+              .eq("materie", m)
+              .order("id", { ascending: true })
+              .limit(10)
+          )
+        );
+        for (const { data, error } of results) {
+          if (error) throw error;
+          questions = questions.concat((data || []).map(toRunnerFormat));
+        }
+      } else {
+        let query = sb.from("intrebari")
+          .select("id, materie, text, optiunea_a, optiunea_b, optiunea_c, raspuns_corect, explicatie")
+          .order("id", { ascending: true })
+          .limit(setCount * 4);
+
+        const materii = selectedBranch !== "all" ? MATERIE_MAP[selectedBranch] : null;
+        if (materii && materii.length === 1) {
+          query = query.eq("materie", materii[0]);
+        } else if (materii && materii.length > 1) {
+          query = query.in("materie", materii);
+        }
+
+        const { data, error } = await query;
+        if (error) throw error;
+        questions = (data || []).sort(() => Math.random() - 0.5).slice(0, setCount).map(toRunnerFormat);
       }
 
-      const { data, error } = await query;
-      if (error) throw error;
-
-      const shuffled = (data || []).sort(() => Math.random() - 0.5).slice(0, setCount);
-      const questions = shuffled.map(toRunnerFormat);
       onStartRunner(runMode, questions);
     } catch (e) {
       alert("Eroare la încărcarea întrebărilor: " + e.message);
