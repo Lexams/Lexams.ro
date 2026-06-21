@@ -1347,20 +1347,20 @@ const PackageCard = ({ tier, price, period, tagline, features, ctaLabel, ctaOnCl
       background: bg, color: col,
       border: dark ? "0" : "1px solid var(--color-hairline)",
       borderRadius: "var(--radius-lg)",
-      padding: "24px 32px",
+      padding: "18px 24px",
       display: "grid",
-      gridTemplateColumns: "1fr 1fr auto",
-      gap: 32,
+      gridTemplateColumns: "200px 1fr auto",
+      gap: 24,
       alignItems: "center",
     }}>
       {/* Stânga: nume + preț + tagline */}
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        <div style={{ fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 600, letterSpacing: "-0.4px" }}>{tier}</div>
+        <div style={{ fontFamily: "var(--font-display)", fontSize: 18, fontWeight: 600, letterSpacing: "-0.4px" }}>{tier}</div>
         <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-          <span style={{ fontFamily: "var(--font-display)", fontSize: 40, fontWeight: 600, letterSpacing: "-0.8px" }}>{price}</span>
-          <span style={{ fontSize: 14, color: muted, letterSpacing: "-0.224px" }}>{period}</span>
+          <span style={{ fontFamily: "var(--font-display)", fontSize: 32, fontWeight: 600, letterSpacing: "-0.8px" }}>{price}</span>
+          <span style={{ fontSize: 13, color: muted, letterSpacing: "-0.224px" }}>{period}</span>
         </div>
-        <p style={{ margin: 0, fontSize: 14, color: muted, letterSpacing: "-0.224px" }}>{tagline}</p>
+        <p style={{ margin: 0, fontSize: 13, color: muted, letterSpacing: "-0.224px" }}>{tagline}</p>
       </div>
       {/* Mijloc: features */}
       <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 8 }}>
