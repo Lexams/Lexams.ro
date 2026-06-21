@@ -1218,9 +1218,10 @@ const Footer = ({ onNavigate }) => {
       title: "Pachete",
       links: [
         ["Gratuit", () => onNavigate("pachete")],
-        ["Start — 49,00 lei", () => onNavigate("pachete")],
-        ["Pro — 99,00 lei", () => onNavigate("pachete")],
-        ["Premium — 149,00 lei", () => onNavigate("pachete")],
+        ["Start — 69,00 lei", () => onNavigate("pachete")],
+        ["Pro — 129,00 lei", () => onNavigate("pachete")],
+        ["Premium — 169,00 lei", () => onNavigate("pachete")],
+        ["Simulare unică — 49,00 lei", () => onNavigate("pachete")],
         ["Comparație", () => onNavigate("pachete")],
       ],
     },
@@ -1737,7 +1738,7 @@ const QuestionRunner = ({ questions, onExit, isSimulare = false }) => {
             <Icon name="chevron-left" size={14} /> Înapoi
           </button>
           <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-            {isSimulare && <ExamTimer totalSeconds={3 * 3600} />}
+            {isSimulare && <ExamTimer totalSeconds={90 * 60} />}
             <span style={{ fontSize: 14, color: "var(--color-ink-muted-48)", letterSpacing: "-0.224px" }}>
               {question.branch} · Întrebarea {index + 1} din {total}
             </span>
@@ -2905,10 +2906,10 @@ const HomeScreen = ({ onNavigate, tweaks }) => (
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginBottom: 40 }}>
           {[
-            { tier: "Gratuit", price: "0,00", count: "50" },
-            { tier: "Start",   price: "49,00", count: "2 200" },
-            { tier: "Pro",     price: "99,00", count: "4 500", popular: true },
-            { tier: "Premium", price: "149,00", count: "10.000+" },
+            { tier: "Gratuit", price: "0,00",   count: "50" },
+            { tier: "Start",   price: "69,00",  count: "2 200" },
+            { tier: "Pro",     price: "129,00", count: "3 000", popular: true },
+            { tier: "Premium", price: "169,00", count: "6 000+" },
           ].map(p => (
             <div
               key={p.tier}
@@ -3048,7 +3049,7 @@ const PACKAGES = [
   },
   {
     tier: "Start",
-    price: "49",
+    price: "69",
     period: "/ lună",
     count: "2 200",
     countLong: "2 200 de întrebări",
@@ -3062,17 +3063,17 @@ const PACKAGES = [
   },
   {
     tier: "Pro",
-    price: "99",
-    price3: "249",
+    price: "129",
+    price3: "329",
     period: "/ lună",
     period3: "/ 3 luni",
-    count: "4 500",
-    countLong: "4 500 de întrebări",
-    tagline: "Mai mult volum, simulări de examen și profil de aptitudine.",
+    count: "3 000",
+    countLong: "3 000 de întrebări",
+    tagline: "Mai mult volum, 3 simulări de examen și profil de aptitudine.",
     features: [
-      "4 500 de întrebări unice",
+      "3 000 de întrebări unice",
       "Explicații complete + referință la lege",
-      "5 simulări de examen",
+      "3 simulări de examen",
       "Profil de aptitudine personalizat",
       "Statistici de progres",
     ],
@@ -3082,25 +3083,39 @@ const PACKAGES = [
   },
   {
     tier: "Premium",
-    price: "149",
-    price3: "379",
+    price: "169",
+    price3: "429",
     period: "/ lună",
     period3: "/ 3 luni",
-    count: "10.000+",
-    countLong: "10.000+ de întrebări",
+    count: "6 000+",
+    countLong: "6 000+ de întrebări",
     tagline: "Tot ce există în Lexams. Pentru cine nu lasă nimic la voia întâmplării.",
     features: [
-      "Peste 10.000 de întrebări unice",
+      "Peste 6 000 de întrebări unice",
       "Explicații complete + referință la lege",
-      "20 de simulări de examen",
+      "10 simulări de examen",
       "Profil de aptitudine complet + evoluție în timp",
       "Statistici de progres",
-      "Jurisprudență inclusă la explicații",
-      "Recapitulări automate pe punctele slabe",
     ],
     ctaLabel: "Cumpără Premium",
     dark: true,
     hasBilling: true,
+  },
+  {
+    tier: "Simulare",
+    price: "49",
+    period: "/ simulare",
+    count: "100",
+    countLong: "100 de întrebări",
+    tagline: "O simulare completă, o singură plată. Timp limitat: 90 de minute.",
+    features: [
+      "100 de întrebări din toate materiile",
+      "Timp limitat — 90 de minute",
+      "Răspuns corect + explicație după fiecare",
+      "Fără abonament, fără reînnoire",
+    ],
+    ctaLabel: "Cumpără simulare",
+    isSingle: true,
   },
 ];
 
@@ -3194,15 +3209,14 @@ const PachetCards = ({ onNavigate, onBuy }) => {
 // ── Variant: comparison table ──────────────────────────────────────────────────
 const PachetTable = ({ onNavigate }) => {
   const rows = [
-    ["Preț",                  "0,00 lei",   "49,00 lei",  "99,00 lei",  "149,00 lei"],
-    ["Plată",                 "—",       "Unică",   "Unică",   "Unică"],
-    ["Întrebări",             "50",      "2 200",   "4 500",   "10.000+"],
-    ["Explicații",            "Scurte",  "Complete","Complete","Complete"],
-    ["Jurisprudență",         "—",       "—",       "—",       "Da"],
-    ["Simulări de examen examen",       "—",       "—",       "5",       "20"],
-    ["Profil aptitudine",     "—",       "—",       "Da",      "Complet"],
-    ["Acces",                 "—",       "1 lună",  "1 sau 3 luni", "1 sau 3 luni"],
-    ["Asistență",             "—",       "E-mail",  "E-mail",  "Prioritară"],
+    ["Preț",              "0,00 lei",  "69,00 lei",  "129,00 lei", "169,00 lei"],
+    ["Plată",             "—",         "Lunară",     "Lunară",     "Lunară"],
+    ["Întrebări",         "50",        "2 200",      "3 000",      "6 000+"],
+    ["Explicații",        "Scurte",    "Complete",   "Complete",   "Complete"],
+    ["Simulări de examen","—",         "—",          "3",          "10"],
+    ["Profil aptitudine", "—",         "—",          "Da",         "Complet"],
+    ["Acces",             "—",         "1 lună",     "1 sau 3 luni","1 sau 3 luni"],
+    ["Asistență",         "—",         "E-mail",     "E-mail",     "Prioritară"],
   ];
   const cols = ["Gratuit", "Start", "Pro", "Premium"];
   return (
@@ -3240,7 +3254,7 @@ const PachetTable = ({ onNavigate }) => {
                 )}
                 <div style={{ fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 600, color: "var(--color-ink)", letterSpacing: "-0.3px" }}>{c}</div>
                 <div style={{ fontFamily: "var(--font-display)", fontSize: 32, fontWeight: 600, color: "var(--color-ink)", letterSpacing: "-0.6px", marginTop: 6 }}>
-                  {i === 0 ? "0,00" : i === 1 ? "49,00" : i === 2 ? "99,00" : "149,00"}
+                  {i === 0 ? "0,00" : i === 1 ? "69,00" : i === 2 ? "129,00" : "169,00"}
                   <span style={{ fontSize: 14, color: "var(--color-ink-muted-48)", fontWeight: 400, marginLeft: 4 }}>lei</span>
                 </div>
               </div>
@@ -3959,9 +3973,10 @@ Object.assign(window, { ContactScreen });
 /* ===== src/screens-checkout.jsx ===== */
 
 const STRIPE_LINKS = {
-  "Start":   "https://buy.stripe.com/test_9B6bJ113R1Z15jAen44Ja00",
-  "Pro":     "https://buy.stripe.com/test_aFaaEX7sf1Z1h2ia6O4Ja01",
-  "Premium": "https://buy.stripe.com/test_4gMcN58wjeLNcM21Ai4Ja02",
+  "Start":    "https://buy.stripe.com/test_9B6bJ113R1Z15jAen44Ja00",
+  "Pro":      "https://buy.stripe.com/test_aFaaEX7sf1Z1h2ia6O4Ja01",
+  "Premium":  "https://buy.stripe.com/test_4gMcN58wjeLNcM21Ai4Ja02",
+  "Simulare": "https://buy.stripe.com/test_simulare_placeholder",
 };
 
 const CheckoutScreen = ({ pkg, onNavigate, user }) => {
@@ -4128,10 +4143,10 @@ Object.assign(window, { CheckoutScreen });
 /* ===== src/practice-screen.jsx ===== */
 
 const PACKAGES_CONFIG = {
-  gratuit: { label: "Gratuit",  count: 50,     branches: false, simulare: false, setCount: 50   },
-  start:   { label: "Start",    count: 2200,   branches: true,  simulare: false, setCount: 30   },
-  pro:     { label: "Pro",      count: 4500,   branches: true,  simulare: true,  setCount: 30   },
-  premium: { label: "Premium",  count: 10000,  branches: true,  simulare: true,  setCount: 30   },
+  gratuit: { label: "Gratuit",  count: 50,    branches: false, simulare: false, setCount: 50, simulareCount: 0  },
+  start:   { label: "Start",    count: 2200,  branches: true,  simulare: false, setCount: 30, simulareCount: 0  },
+  pro:     { label: "Pro",      count: 3000,  branches: true,  simulare: true,  setCount: 30, simulareCount: 3  },
+  premium: { label: "Premium",  count: 6000,  branches: true,  simulare: true,  setCount: 30, simulareCount: 10 },
 };
 
 const BRANCH_LIST = [
