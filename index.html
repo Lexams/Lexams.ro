@@ -1224,44 +1224,17 @@ const GlobalNav = ({ current, onNavigate, user, onLogin, onLogout }) => {
 const Footer = ({ onNavigate }) => {
   const cols = [
     {
-      title: "Pachete",
-      links: [
-        ["Gratuit", () => onNavigate("pachete")],
-        ["Start — 69,00 lei", () => onNavigate("pachete")],
-        ["Pro — 129,00 lei", () => onNavigate("pachete")],
-        ["Premium — 169,00 lei", () => onNavigate("pachete")],
-        ["Simulare unică — 49,00 lei", () => onNavigate("pachete")],
-        ["Comparație", () => onNavigate("pachete")],
-      ],
-    },
-    {
-      title: "Învață",
-      links: [
-        ["Exersează", () => onNavigate("practice")],
-        ["Drept civil", () => onNavigate("practice")],
-        ["Drept procesual civil", () => onNavigate("practice")],
-        ["Drept penal", () => onNavigate("practice")],
-        ["Drept procesual penal", () => onNavigate("practice")],
-        ["OEPA", () => onNavigate("practice")],
-      ],
-    },
-    {
       title: "Cont",
       links: [
         ["Intră în cont", () => onNavigate("profil")],
         ["Creează cont", () => onNavigate("profil")],
-        ["Abonament", () => onNavigate("profil")],
-        ["Facturi", () => onNavigate("profil")],
       ],
     },
     {
-      title: "Lexams",
+      title: "Asistență",
       links: [
-        ["Despre", () => onNavigate("home")],
-        ["Studenți", () => onNavigate("home")],
-        ["Universități", () => onNavigate("home")],
-        ["Asistență", () => onNavigate("contact")],
         ["Contact", () => onNavigate("contact")],
+        ["Asistență", () => onNavigate("contact")],
       ],
     },
   ];
@@ -1270,7 +1243,7 @@ const Footer = ({ onNavigate }) => {
       style={{
         background: "var(--color-surface-tile-1)",
         color: "rgba(255,255,255,0.65)",
-        padding: "64px 24px 32px",
+        padding: "40px 24px 24px",
       }}
     >
       <div style={{ maxWidth: 1440, margin: "0 auto" }}>
@@ -1290,12 +1263,10 @@ const Footer = ({ onNavigate }) => {
           </div>
         </div>
         <div
-          className="mobile-stack"
           style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(4, 1fr)",
-            gap: 32,
-            paddingBottom: 32,
+            display: "flex",
+            gap: 64,
+            paddingBottom: 24,
             borderBottom: "1px solid rgba(255,255,255,0.08)",
           }}
         >
