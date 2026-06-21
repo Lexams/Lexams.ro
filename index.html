@@ -3410,7 +3410,35 @@ Object.assign(window, { PachetScreen, PACKAGES });
 /* ===== src/screens-profil.jsx ===== */
 // Profil — student profile / dashboard. ProfileViz kind comes from tweaks.
 
-const ProfilScreen = ({ onNavigate, tweaks }) => {
+const ProfilScreen = ({ onNavigate, tweaks, user }) => {
+  /* ── Date utilizator ── */
+  const emailLocal = (user?.email || "").split("@")[0];
+  const prenume = emailLocal
+    ? emailLocal.charAt(0).toUpperCase() + emailLocal.slice(1).replace(/[._\-]/g, " ").split(" ")[0]
+    : "Student";
+  const initiale = prenume.slice(0, 2).toUpperCase();
+
+  /* ── Abonament din Supabase ── */
+  const [abonament, setAbonament] = React.useState(null);
+  React.useEffect(() => {
+    if (!user) return;
+    sb.from("abonamente")
+      .select("pachet, data_start, data_expirare")
+      .eq("user_id", user.id)
+      .eq("activ", true)
+      .order("data_start", { ascending: false })
+      .limit(1)
+      .single()
+      .then(({ data }) => setAbonament(data || null));
+  }, [user?.id]);
+
+  const pachetLabel = abonament
+    ? abonament.pachet.charAt(0).toUpperCase() + abonament.pachet.slice(1)
+    : "Gratuit";
+  const expiraLabel = abonament?.data_expirare
+    ? new Date(abonament.data_expirare).toLocaleDateString("ro-RO", { month: "short", year: "numeric" })
+    : null;
+
   /* Ordered so related materii are adjacent on the radar:
      Civil (top) → Proc.civil (top-right) → OEPA (bottom-right)
      → Proc.penal (bottom-left) → Penal (top-left)             */
@@ -3523,14 +3551,14 @@ const ProfilScreen = ({ onNavigate, tweaks }) => {
       <section className="tile dark" style={{ paddingTop: 48, paddingBottom: 48 }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 32px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 24, flexWrap: "wrap" }} className="profil-header-inner">
           <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-            <div style={{ width: 40, height: 40, borderRadius: "50%", background: "var(--color-primary)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-display)", fontSize: 15, fontWeight: 600, color: "#fff", letterSpacing: "-0.2px" }}>AM</div>
+            <div style={{ width: 40, height: 40, borderRadius: "50%", background: "var(--color-primary)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-display)", fontSize: 15, fontWeight: 600, color: "#fff", letterSpacing: "-0.2px" }}>{initiale}</div>
             <div>
-              <div style={{ fontFamily: "var(--font-display)", fontSize: 20, fontWeight: 600, color: "var(--color-on-dark)", letterSpacing: "-0.3px" }}>Bună, Ana.</div>
+              <div style={{ fontFamily: "var(--font-display)", fontSize: 20, fontWeight: 600, color: "var(--color-on-dark)", letterSpacing: "-0.3px" }}>Bună, {prenume}.</div>
               <div style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", letterSpacing: "-0.12px", marginTop: 2 }}>{totalCorrect} din {totalAll} răspunsuri corecte · {overallPct}% general</div>
             </div>
           </div>
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
-            {[["Simulări de examen", "3 / 5"], ["Pachet", "Pro · aug 2026"]].map(([l, v]) => (
+            {[["Simulări de examen", "3 / 5"], ["Pachet", expiraLabel ? `${pachetLabel} · ${expiraLabel}` : pachetLabel]].map(([l, v]) => (
               <div key={l} style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.10)", borderRadius: "var(--radius-pill)", padding: "6px 14px", display: "inline-flex", gap: 8, fontSize: 13 }}>
                 <span style={{ color: "rgba(255,255,255,0.5)", fontSize: 11, fontWeight: 600, letterSpacing: "0.5px", textTransform: "uppercase" }}>{l}</span>
                 <span style={{ color: "#fff", fontWeight: 600 }}>{v}</span>
@@ -3649,10 +3677,18 @@ const ProfilScreen = ({ onNavigate, tweaks }) => {
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 32px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 24, flexWrap: "wrap" }}>
           <div>
             <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.5px", color: "rgba(255,255,255,0.45)", textTransform: "uppercase", marginBottom: 6 }}>Pachet activ</div>
-            <div style={{ fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 600, color: "#fff", letterSpacing: "-0.3px" }}>Lexams Pro · 99,00 lei</div>
-            <div style={{ fontSize: 13, color: "rgba(255,255,255,0.45)", marginTop: 4, letterSpacing: "-0.1px" }}>Activ din 14 mai 2026. Expiră 14 august 2026.</div>
+            <div style={{ fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 600, color: "#fff", letterSpacing: "-0.3px" }}>
+              {abonament ? `Lexams ${pachetLabel}` : "Lexams Gratuit"}
+            </div>
+            <div style={{ fontSize: 13, color: "rgba(255,255,255,0.45)", marginTop: 4, letterSpacing: "-0.1px" }}>
+              {abonament
+                ? `Activ din ${new Date(abonament.data_start).toLocaleDateString("ro-RO", { day: "numeric", month: "long", year: "numeric" })}. Expiră ${new Date(abonament.data_expirare).toLocaleDateString("ro-RO", { day: "numeric", month: "long", year: "numeric" })}.`
+                : "Nu ai un abonament activ."}
+            </div>
           </div>
-          <Button variant="primary" onClick={() => onNavigate("pachete")}>Treci la Premium</Button>
+          <Button variant="primary" onClick={() => onNavigate("pachete")}>
+            {abonament?.pachet === "premium" ? "Reînnoiește" : "Fă upgrade"}
+          </Button>
         </div>
       </section>
 
@@ -4299,7 +4335,7 @@ function App() {
   switch (route) {
     case "pachete":  Screen = <PachetScreen onNavigate={navigate} onBuy={goToCheckout} tweaks={t} />; break;
     case "checkout": Screen = <CheckoutScreen pkg={cartPackage} onNavigate={navigate} user={user} />; break;
-    case "profil":   Screen = <ProfilScreen onNavigate={navigate} tweaks={t} />; break;
+    case "profil":   Screen = <ProfilScreen onNavigate={navigate} tweaks={t} user={user} />; break;
     case "contact":  Screen = <ContactScreen onNavigate={navigate} tweaks={t} />; break;
     case "home":
     default:         Screen = <HomeScreen onNavigate={navigate} tweaks={t} />;
