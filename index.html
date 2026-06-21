@@ -4124,12 +4124,77 @@ const BRANCH_LIST = [
   { id: "oepa",     label: "OEPA",                      glyph: "civil"    },
 ];
 
-const PracticeScreen = ({ onNavigate, onStartRunner }) => {
-  // Auth + package state — simulate until Supabase is connected
-  const [isLoggedIn, setIsLoggedIn] = React.useState(false);
-  const [activePackage, setActivePackage] = React.useState("pro");
+const MATERIE_MAP = {
+  "civil":    ["Drept civil"],
+  "proc-civ": ["Drept procesual civil"],
+  "penal":    ["Drept penal general", "Drept penal special"],
+  "proc-pen": ["Drept procesual penal"],
+  "oepa":     ["OEPA"],
+};
+
+function toRunnerFormat(row) {
+  const letters = (row.raspuns_corect || "A").toUpperCase();
+  return {
+    id:           row.id,
+    branch:       row.materie,
+    text:         row.text,
+    options:      [row.optiunea_a, row.optiunea_b, row.optiunea_c].filter(Boolean),
+    correctIndex: "ABC".indexOf(letters[0]),
+    explanation:  row.explicatie || "",
+  };
+}
+
+const PracticeScreen = ({ onNavigate, onStartRunner, user }) => {
+  const isLoggedIn = !!user;
+  const [activePackage, setActivePackage] = React.useState("gratuit");
   const [selectedBranch, setSelectedBranch] = React.useState("all");
   const [mode, setMode] = React.useState("set");
+  const [loading, setLoading] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!user) return;
+    sb.from("abonamente")
+      .select("pachet")
+      .eq("user_id", user.id)
+      .eq("activ", true)
+      .order("data_start", { ascending: false })
+      .limit(1)
+      .single()
+      .then(({ data }) => {
+        if (data?.pachet) setActivePackage(data.pachet);
+        else setActivePackage("gratuit");
+      });
+  }, [user?.id]);
+
+  const fetchAndStart = async (runMode) => {
+    setLoading(true);
+    try {
+      const pkg = PACKAGES_CONFIG[activePackage];
+      const setCount = runMode === "simulare" ? 100 : pkg.setCount;
+      const fetchCount = Math.min(setCount * 4, 400);
+
+      let query = sb.from("intrebari")
+        .select("id, materie, text, optiunea_a, optiunea_b, optiunea_c, raspuns_corect, explicatie")
+        .limit(fetchCount);
+
+      const materii = selectedBranch !== "all" ? MATERIE_MAP[selectedBranch] : null;
+      if (materii && materii.length === 1) {
+        query = query.eq("materie", materii[0]);
+      } else if (materii && materii.length > 1) {
+        query = query.in("materie", materii);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+
+      const shuffled = (data || []).sort(() => Math.random() - 0.5).slice(0, setCount);
+      const questions = shuffled.map(toRunnerFormat);
+      onStartRunner(runMode, questions);
+    } catch (e) {
+      alert("Eroare la încărcarea întrebărilor: " + e.message);
+    }
+    setLoading(false);
+  };
 
   const pkg = PACKAGES_CONFIG[activePackage];
   const canSimulare = pkg.simulare;
@@ -4186,8 +4251,8 @@ const PracticeScreen = ({ onNavigate, onStartRunner }) => {
             </p>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 10, width: "100%" }}>
-            <Button variant="primary" style={{ width: "100%" }} onClick={() => onStartRunner("set")}>
-              Începe cele 50 de întrebări
+            <Button variant="primary" style={{ width: "100%" }} onClick={() => fetchAndStart("set")} disabled={loading}>
+              {loading ? "Se încarcă..." : "Începe cele 50 de întrebări"}
             </Button>
             <button onClick={() => onNavigate("pachete")} style={{ background: "transparent", border: "1px solid var(--color-hairline)", borderRadius: "var(--radius-pill)", padding: "12px 22px", fontFamily: "var(--font-text)", fontSize: 16, letterSpacing: "-0.374px", color: "var(--color-ink)", cursor: "pointer" }}>
               Vezi pachetele complete
@@ -4307,7 +4372,7 @@ const PracticeScreen = ({ onNavigate, onStartRunner }) => {
             {" · "}
             {mode === "set" ? `Set tematic · ${pkg.setCount} întrebări` : "Simulare de examen · 100 întrebări"}
           </span>
-          <Button variant="primary" onClick={() => onStartRunner(mode)}>
+          <Button variant="primary" onClick={() => fetchAndStart(mode)} disabled={loading}>
             Începe
           </Button>
         </div>
@@ -4361,6 +4426,7 @@ function App() {
   };
 
   const [practiceMode, setPracticeMode] = React.useState("set");
+  const [runnerQuestions, setRunnerQuestions] = React.useState([]);
 
   const navProps = {
     user,
@@ -4380,7 +4446,7 @@ function App() {
     return (
       <React.Fragment>
         <GlobalNav current="practice" onNavigate={navigate} {...navProps} />
-        <PracticeScreen onNavigate={navigate} onStartRunner={(mode) => { setPracticeMode(mode); navigate("runner"); }} />
+        <PracticeScreen onNavigate={navigate} user={user} onStartRunner={(mode, qs) => { setPracticeMode(mode); setRunnerQuestions(qs); navigate("runner"); }} />
         <Footer onNavigate={navigate} />
         <TogaTweaks t={t} setTweak={setTweak} />
         {loginModal}
@@ -4392,7 +4458,7 @@ function App() {
     return (
       <React.Fragment>
         <GlobalNav current="practice" onNavigate={navigate} {...navProps} />
-        <QuestionRunner questions={SAMPLE_QUESTIONS} onExit={() => navigate("practice")} isSimulare={practiceMode === "simulare"} />
+        <QuestionRunner questions={runnerQuestions.length > 0 ? runnerQuestions : SAMPLE_QUESTIONS} onExit={() => navigate("practice")} isSimulare={practiceMode === "simulare"} />
         <TogaTweaks t={t} setTweak={setTweak} />
         {loginModal}
       </React.Fragment>
