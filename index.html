@@ -1935,10 +1935,10 @@ const LoginModal = ({ onClose, onSuccess }) => {
         if (err) throw err;
         if (data?.user) {
           await sb.from("profiles").upsert({
-            uid: data.user.id,
-            display_name: prenume + " " + nume,
+            id: data.user.id,
+            prenume: prenume,
+            nume: nume,
             email: email,
-            phone: telefon,
           });
         }
         setDone(true);
@@ -3479,15 +3479,15 @@ const ProfilScreen = ({ onNavigate, tweaks, user }) => {
     if (!user) return;
 
     sb.from("profiles")
-      .select("display_name")
-      .eq("uid", user.id)
+      .select("prenume, nume")
+      .eq("id", user.id)
       .single()
       .then(({ data }) => {
-        const name = data?.display_name || user.email?.split("@")[0] || "Student";
-        const firstName = name.split(/[\s._\-]/)[0];
-        const cap = firstName.charAt(0).toUpperCase() + firstName.slice(1);
+        const first = data?.prenume || user.email?.split("@")[0] || "Student";
+        const cap = first.charAt(0).toUpperCase() + first.slice(1);
+        const ini = (first.charAt(0) + (data?.nume?.charAt(0) || first.charAt(1) || "")).toUpperCase();
         setPrenume(cap);
-        setInitiale(cap.slice(0, 2).toUpperCase());
+        setInitiale(ini);
       });
 
     sb.from("abonamente")
