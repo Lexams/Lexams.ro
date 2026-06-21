@@ -1927,8 +1927,14 @@ const LoginModal = ({ onClose, onSuccess }) => {
         if (err) throw err;
         onSuccess && onSuccess();
         onClose();
-      } else {
+      } else if (mode === "register") {
         const { error: err } = await sb.auth.signUp({ email, password });
+        if (err) throw err;
+        setDone(true);
+      } else if (mode === "reset") {
+        const { error: err } = await sb.auth.resetPasswordForEmail(email, {
+          redirectTo: window.location.href,
+        });
         if (err) throw err;
         setDone(true);
       }
@@ -1964,8 +1970,10 @@ const LoginModal = ({ onClose, onSuccess }) => {
             <div style={{ fontSize: 40, marginBottom: 12 }}>✉️</div>
             <p style={{ fontSize: 18, fontWeight: 700, marginBottom: 8, color: "var(--color-ink)" }}>Verifică emailul!</p>
             <p style={{ color: "#7a7a7a", fontSize: 14, lineHeight: 1.5 }}>
-              Ți-am trimis un link de confirmare la <strong>{email}</strong>.<br/>
-              Deschide emailul și apasă linkul pentru a activa contul.
+              {mode === "reset"
+                ? <span>Ți-am trimis un link de resetare a parolei la <strong>{email}</strong>.<br/>Verifică și folderul Spam.</span>
+                : <span>Ți-am trimis un link de confirmare la <strong>{email}</strong>.<br/>Deschide emailul și apasă linkul pentru a activa contul.</span>
+              }
             </p>
             <button onClick={onClose} style={{
               marginTop: 28, background: "var(--color-primary)", color: "#fff",
@@ -1975,10 +1983,10 @@ const LoginModal = ({ onClose, onSuccess }) => {
         ) : (
           <>
             <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 6, color: "var(--color-ink)" }}>
-              {mode === "login" ? "Intră în cont" : "Creează cont"}
+              {mode === "login" ? "Intră în cont" : mode === "reset" ? "Resetează parola" : "Creează cont"}
             </h2>
             <p style={{ color: "#7a7a7a", fontSize: 14, marginBottom: 26 }}>
-              {mode === "login" ? "Bine ai revenit la LeXams." : "Înregistrare gratuită, fără card."}
+              {mode === "login" ? "Bine ai revenit la LeXams." : mode === "reset" ? "Îți trimitem un link pe email." : "Înregistrare gratuită, fără card."}
             </p>
             <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               <input
@@ -1988,6 +1996,7 @@ const LoginModal = ({ onClose, onSuccess }) => {
                 onFocus={e => e.target.style.borderColor = "var(--color-primary)"}
                 onBlur={e => e.target.style.borderColor = "#e0e0e0"}
               />
+              {mode !== "reset" && (
               <input
                 type="password" required placeholder="Parolă (min. 6 caractere)" minLength={6}
                 value={password} onChange={e => setPassword(e.target.value)}
@@ -1995,6 +2004,7 @@ const LoginModal = ({ onClose, onSuccess }) => {
                 onFocus={e => e.target.style.borderColor = "var(--color-primary)"}
                 onBlur={e => e.target.style.borderColor = "#e0e0e0"}
               />
+              )}
               {error && (
                 <p style={{ color: "#DC2626", fontSize: 13, margin: 0, background: "#FEF2F2", padding: "8px 12px", borderRadius: 8 }}>
                   {error}
@@ -2005,13 +2015,23 @@ const LoginModal = ({ onClose, onSuccess }) => {
                 borderRadius: 10, padding: "13px 24px", fontWeight: 600, fontSize: 15,
                 opacity: busy ? 0.7 : 1, marginTop: 6, cursor: busy ? "wait" : "pointer",
               }}>
-                {busy ? "Se procesează..." : mode === "login" ? "Intră în cont" : "Creează cont"}
+                {busy ? "Se procesează..." : mode === "login" ? "Intră în cont" : mode === "reset" ? "Trimite link de resetare" : "Creează cont"}
               </button>
             </form>
-            <p style={{ textAlign: "center", fontSize: 13, color: "#7a7a7a", marginTop: 22, marginBottom: 0 }}>
-              {mode === "login" ? "Nu ai cont? " : "Ai deja cont? "}
+            {mode === "login" && (
+              <p style={{ textAlign: "center", fontSize: 13, color: "#7a7a7a", marginTop: 14, marginBottom: 0 }}>
+                <button
+                  onClick={() => { setMode("reset"); setError(""); }}
+                  style={{ color: "#7a7a7a", background: "transparent", fontSize: 13 }}
+                >
+                  Ai uitat parola?
+                </button>
+              </p>
+            )}
+            <p style={{ textAlign: "center", fontSize: 13, color: "#7a7a7a", marginTop: 10, marginBottom: 0 }}>
+              {mode === "reset" ? "Înapoi la " : mode === "login" ? "Nu ai cont? " : "Ai deja cont? "}
               <button
-                onClick={() => { setMode(mode === "login" ? "register" : "login"); setError(""); }}
+                onClick={() => { setMode(mode === "register" ? "login" : mode === "reset" ? "login" : "register"); setError(""); }}
                 style={{ color: "var(--color-primary)", fontWeight: 600, background: "transparent", fontSize: 13 }}
               >
                 {mode === "login" ? "Înregistrează-te" : "Intră în cont"}
