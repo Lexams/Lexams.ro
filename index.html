@@ -1693,15 +1693,23 @@ const BrainHeadChart = ({ branches }) => {
       ctx.fillStyle = "#141414";
       ctx.fillRect(0, 0, W, H);
 
-      // Draw brain image
+      // Draw brain image — object-fit:cover to preserve aspect ratio
       if (img.complete && img.naturalWidth > 0) {
-        ctx.drawImage(img, 0, 0, IMG_W, H);
-        // Gradient fade on right edge of image so it blends into background
-        const grad = ctx.createLinearGradient(IMG_W - 80, 0, IMG_W + 20, 0);
+        const scale = Math.max(IMG_W / img.naturalWidth, H / img.naturalHeight);
+        const sw = IMG_W / scale, sh = H / scale;
+        const sx = (img.naturalWidth - sw) / 2, sy = (img.naturalHeight - sh) / 2;
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(0, 0, IMG_W, H);
+        ctx.clip();
+        ctx.drawImage(img, sx, sy, sw, sh, 0, 0, IMG_W, H);
+        ctx.restore();
+        // Gradient fade on right edge
+        const grad = ctx.createLinearGradient(IMG_W - 90, 0, IMG_W + 10, 0);
         grad.addColorStop(0, "rgba(20,20,20,0)");
         grad.addColorStop(1, "rgba(20,20,20,1)");
         ctx.fillStyle = grad;
-        ctx.fillRect(IMG_W - 80, 0, 100, H);
+        ctx.fillRect(IMG_W - 90, 0, 110, H);
       }
 
       branches.forEach((b, i) => {
